@@ -74,7 +74,7 @@ class Parser {
     }
   }
 
-// Chapter 12 - Challenge Question 1  
+// Chapter 12 - Challenge Question  
 //< Statements and State declaration
 //> Classes parse-class-declaration
   private Stmt classDeclaration() {
@@ -84,6 +84,14 @@ class Parser {
     List<Stmt.Function> methods = new ArrayList<>();
     List<Stmt.Function> classMethods = new ArrayList<>();
     consume(LEFT_BRACE, "Expect '{' before class body.");
+    
+    List<Expr.Variable> superclass = new ArrayList<>();
+    if (match(LESS)) {
+      do {
+        consume(IDENTIFIER, "Expect superclass name.");
+        superclass.add(new Expr.Variable(previous()));
+      } while (match(COMMA));
+    }
 
     while (!check(RIGHT_BRACE) && !isAtEnd()) {
       boolean isClassMethod = match(CLASS);

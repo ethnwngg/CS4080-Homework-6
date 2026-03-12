@@ -13,6 +13,7 @@ class LoxClass extends LoxInstance implements LoxCallable {
   final String name;
 //> Inheritance lox-class-superclass-field
   final LoxClass superclass;
+  final List<LoxClass> superclasses;
 //< Inheritance lox-class-superclass-field
 /* Classes lox-class < Classes lox-class-methods
 
@@ -30,12 +31,12 @@ class LoxClass extends LoxInstance implements LoxCallable {
 
 // Changing declaration of LoxClass
 // Chapter 12 - Challenge Question 1
-  LoxClass(LoxClass metaclass, String name,
+  LoxClass(String name, List<LoxClass> superclasses,
            Map<String, LoxFunction> methods) {
-    super(metaclass);
+    super(metaclasses);
 //< Inheritance lox-class-constructor
     this.name = name;
-    this.superclass = null;
+    this.superclasses = superclasses;
     this.methods = methods;
   }
 //< lox-class-methods
@@ -45,12 +46,11 @@ class LoxClass extends LoxInstance implements LoxCallable {
       return methods.get(name);
     }
 
-//> Inheritance find-method-recurse-superclass
-    if (superclass != null) {
-      return superclass.findMethod(name);
+    for (LoxClass superclass : superclasses) {
+      LoxFunction method = superclass.findMethod(name);
+      if (method != null) return method;
     }
-
-//< Inheritance find-method-recurse-superclass
+    
     return null;
   }
 //< lox-class-find-method

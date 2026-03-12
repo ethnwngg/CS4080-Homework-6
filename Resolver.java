@@ -78,18 +78,22 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
 //> Inheritance resolve-superclass
 
 //> inherit-self
-    if (stmt.superclass != null &&
-        stmt.name.lexeme.equals(stmt.superclass.name.lexeme)) {
-      Lox.error(stmt.superclass.name,
+    for (Expr.Variable superclass : stmt.superclasses) {
+      if (stmt.superclass != null &&
+          stmt.name.lexeme.equals(stmt.superclass.name.lexeme)) {
+        Lox.error(stmt.superclass.name,
           "A class can't inherit from itself.");
     }
+  }
 
 //< inherit-self
     if (stmt.superclass != null) {
 //> set-current-subclass
       currentClass = ClassType.SUBCLASS;
 //< set-current-subclass
-      resolve(stmt.superclass);
+      for (Expr.Variable superclass : stmt.superclasses) {
+        resolve(stmt.superclass);
+      }
     }
 //< Inheritance resolve-superclass
 //> Inheritance begin-super-scope
@@ -113,7 +117,7 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
         declaration = FunctionType.INITIALIZER;
       }
 
-    for (Stmt.Function method : stmt.classMethods) {
+    for (Stmt.Function method : stmt.methods) {
       beginScope();
       scopes.peek().put("this", true);
       resolveFunction(method, FunctionType.METHOD);
@@ -358,9 +362,13 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
 
 //< set-current-function
     beginScope();
-    for (Token param : function.params) {
-      declare(param);
-      define(param);
+    // Adding null parameter
+    // Challenge Question 2
+    if (function.params != null) {
+      for (Token param : function.params) {
+        declare(param);
+        define(param);
+      }
     }
     resolve(function.body);
     endScope();
